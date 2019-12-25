@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>WaterPi - Debug</title>
+  <link rel="stylesheet" href="/static/css/bulma.min.css">
+
+  <script type="text/javascript">
+
+  function refresh_photo() {
+    console.log('Refreshing picture');
+    document.getElementById("preview-photo").src = "/preview_photo#"+ new Date();
+  };
+
+  // From https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Sending_forms_through_JavaScript
+  function update_settings( data ) {
+    const XHR = new XMLHttpRequest(),
+          FD  = new FormData();
+
+    // Push our data into our FormData object
+    for( name in data ) {
+      FD.append( name, data[ name ] );
+    }
+
+    // Define what happens on successful data submission
+    XHR.addEventListener( 'load', function( event ) {
+      // TODO - do something with response
+      console.log(event.target.responseText);
+      refresh_photo();
+    } );
+
+    // Define what happens in case of error
+    XHR.addEventListener(' error', function( event ) {
+      alert( 'Oops! Something went wrong.' );
+    } );
+
+    // Set up our request
+    XHR.open( 'POST', '/update_settings' );
+
+    // Send our FormData object; HTTP headers are set automatically
+    XHR.send( FD );
+  }
+
+  function setting_change(event) {
+    var element = event.target;
+    var data = {}
+
+    data[element.name] = element.value;
+    update_settings(data);
+  };
+  </script>
+</head>
+
+<body>
+
+<section class="section">
+  <div class="container is-fluid">
+    <div class="card-image has-text-centered">
+      <figure class="image is-inline-block"><img src="/preview_photo" id="preview-photo" /></figure>
+    </div>
+    <div class="card-image has-text-centered">
+      <button class="button is-primary" onclick="refresh_photo()">Take Picture</button>
+    </div>
+  </div>
+  <div class="container is-fluid has-text-centered">
+    <h2 class="is-h2">Settings (<a href="/default_settings">reset</a>)</h2>
+      <table class="table is-bordered is-striped" style="margin-left: auto; margin-right: auto;">
+          <tr>
+            <td>Setting</td>
+            <td colspan="2">Value</td>
+          </tr>
+
+        {% for name,control in controls.items() %}
+        <tr>
+          <td>{{name}}</td>
+          <td>
+          {% if control.type == "menu" %}
+          <select name={{ name }} onchange="setting_change(event)">
+            {% for index in range(control.limits["min"], control.limits["max"]+1) %}
+            <option value="{{ index }}" {% if index == control.value %}selected{% endif %}>{{ index }}</option>
+            {% endfor %}
+          </select>
+          {% elif control.type == "bool" %}
+            On <input type="radio" name="{{name}}" value="1" {% if control.value == 1 %} checked{% endif %} onchange="setting_change(event)" />
+            Off <input type="radio" name="{{name}}" value="0" {% if control.value == 0 %} checked{% endif %} onchange="setting_change(event)" />
+          {% else %}
+          <input
+            type="range"
+            name="{{name}}"
+            value = {{control.value}}
+            {% if control.limits["min"] is defined %} min={{ control.limits["min"] }} {% endif %}
+            {% if control.limits["max"] is defined %} max={{ control.limits["max"] }} {% endif %}
+            {% if control.limits["step"] is defined %} step={{ control.limits["step"] }} {% endif %}
+            onchange="setting_change(event)"
+          />
+          {% endif %}
+          </td>
+          <td></td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+</section>
+</body>
+
+</html>
