@@ -1,0 +1,5 @@
+interval_s: 10
+resolution: 1920x1080
+out_dir: /tmp/watch_tl
+prefix: test_
+device: /dev/video0
