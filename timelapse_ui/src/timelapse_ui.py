@@ -18,6 +18,8 @@ def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
             "fswebcam",
             "--no-banner",
             "-sFocus, Auto=False",
+            "-sExposure, Auto=Manual Mode",
+            "-sWhite Balance Temperature, Auto=False",
             "-S5",
             "-d",
             "v4l2:{}".format(device),
@@ -31,7 +33,7 @@ def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
 
     # fswebcam seems to use stderr instead of stdout
     rval = result.stderr.decode("utf-8")
-    if "Error" in rval:
+    if "Error" in rval and "Error querying menu" not in rval:
         print(rval)
         return None
 
