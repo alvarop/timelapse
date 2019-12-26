@@ -8,6 +8,7 @@ from v4l2 import v4l2
 
 app = Flask(__name__)
 
+
 def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
 
     if filename is None:
@@ -58,6 +59,7 @@ def root():
     cam_control = v4l2.V4L2()
     return render_template("preview.html", controls=cam_control.controls)
 
+
 @app.route("/update_settings", methods=["POST"])
 def update_settings():
     cam_control = v4l2.V4L2()
@@ -68,6 +70,7 @@ def update_settings():
             control.set(int(value))
     return "OK"
 
+
 @app.route("/default_settings", methods=["GET", "POST"])
 def default_settings():
     cam_control = v4l2.V4L2()
@@ -76,6 +79,7 @@ def default_settings():
             control.set(control.limits["default"])
             print("updating", name, control.limits["default"])
     return redirect("/")
+
 
 @app.route("/preview_photo")
 def preview_photo():
