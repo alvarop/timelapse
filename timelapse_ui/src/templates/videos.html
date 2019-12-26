@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Timelapse Videos</title>
+  <link rel="stylesheet" href="/static/css/bulma.min.css">
+</head>
+
+<body>
+
+<section class="section">
+  <div class="container is-fluid has-text-centered">
+    <h2 class="is-h2">Available Videos</h2>
+    {% for video in videos %}
+    <p><a href="/video/{{ video["name"] }}">{{ video["name"] }} ({{ video["resolution"] }})</a></p>
+    {% endfor %}
+</div>
+</section>
+</body>
+
+</html>
