@@ -10,3 +10,4 @@ v4l2 = {editable = true,path = "./v4l2"}
 gunicorn = "*"
 flask = "*"
 pyyaml = "*"
+watchdog = "*"

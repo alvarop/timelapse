@@ -1,5 +1,5 @@
-interval_s: 10
+interval_s: 3
 resolution: 1920x1080
-out_dir: /tmp/watch_tl
+out_dir: /tmp/test_timelapse_photos
 prefix: test_
 device: /dev/video0

@@ -1,0 +1,11 @@
+timelapses:
+  - name:       test_timelapse_1080
+    src_dir:    /tmp/test_timelapse_photos
+    out_dir:    /tmp/test_timelapse_videos
+    fps:        30
+    resolution: 1920x1080
+  - name:       test_timelapse_480
+    src_dir:    /tmp/watch_tl
+    out_dir:    /tmp/test_timelapse_videos
+    fps:        30
+    resolution: 852x480
