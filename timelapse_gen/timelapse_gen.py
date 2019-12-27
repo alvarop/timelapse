@@ -217,7 +217,6 @@ for timelapse in config["timelapses"]:
         print("{} not found. Creating".format(timelapse["out_dir"]))
         os.makedirs(timelapse["out_dir"], exist_ok=True)
 
-    timelapse["out_tmp_dir"] = os.path.join(timelapse["out_dir"], "tmp/")
     if not os.path.exists(timelapse["out_tmp_dir"]):
         print("{} not found. Creating".format(timelapse["out_tmp_dir"]))
         os.makedirs(timelapse["out_tmp_dir"], exist_ok=True)
