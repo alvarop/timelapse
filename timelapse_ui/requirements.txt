@@ -1,0 +1,4 @@
+PyYAML
+Flask
+gunicorn
+/srv/v4l2/

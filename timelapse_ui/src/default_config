@@ -1,1 +1,1 @@
-TIMELAPSE_GEN_CONFIG = "../timelapse_gen/sample_timelapse_gen_config.yml"
+TIMELAPSE_GEN_CONFIG = "/srv/timelapse_gen/config.yml"

@@ -1,0 +1,68 @@
+---
+  - name: Update user
+    become: true
+    user:
+      name: "{{ USER }}"
+      groups: video
+      append: true
+
+  - name: Install Python3
+    become: true
+    package:
+      name: python3
+      state: present
+
+  - name: Install pip
+    become: true
+    package:
+      name: python3-pip
+      state: present
+
+  - name: Install virtualenv
+    become: true
+    package:
+      name: virtualenv
+      state: present
+
+  - name: Install v4l-utils
+    become: true
+    package:
+      name: v4l-utils
+      state: present
+
+  - name: Create v4l2 directory
+    become: true
+    file:
+      path: "{{ V4L2_PY_HOME }}"
+      state: directory
+      owner: "{{ USER }}"
+
+
+  - name: Copy v4l2 files
+    synchronize:
+      src: "{{ LOCAL_V4L2_PY_HOME }}/"
+      dest: "{{ V4L2_PY_HOME }}"
+      rsync_opts:
+        - "--exclude=*.egg-info"
+        - "--chown={{ USER }}:{{ USER }}"
+
+  - name: Create app directory
+    become: true
+    file:
+      path: "{{ TIMELAPSE_UI_HOME }}"
+      state: directory
+      owner: "{{ USER }}"
+
+  - name: Copy timelapse_gen files
+    synchronize:
+        src: "{{ LOCAL_TIMELAPSE_UI_HOME }}/"
+        dest: "{{ TIMELAPSE_UI_HOME }}"
+        rsync_opts:
+        - "--chown={{ USER }}:{{ USER }}"
+
+
+  - name: Install virtualenv requirements
+    pip:
+      requirements: "{{ TIMELAPSE_UI_HOME }}/requirements.txt"
+      virtualenv: "{{ TIMELAPSE_UI_HOME }}/venv"
+      virtualenv_python: python3

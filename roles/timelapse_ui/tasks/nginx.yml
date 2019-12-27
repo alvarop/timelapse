@@ -1,0 +1,33 @@
+---
+- name: Setup Nginx
+  become: true
+  package:
+    name: nginx
+    state: present
+
+- name: Remove devault nginx site
+  become: true
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Copy Nginx files
+  become: true
+  template:
+    src: "timelapse_ui"
+    dest: "/etc/nginx/sites-available"
+
+- name: Create symlink for nginx
+  become: true
+  file:
+    src: /etc/nginx/sites-available/timelapse_ui
+    dest: /etc/nginx/sites-enabled/timelapse_ui
+    state: link
+
+- name: Restart Nginx
+  become: true
+  systemd:
+    name: nginx
+    enabled: true
+    state: restarted
+    daemon_reload: true

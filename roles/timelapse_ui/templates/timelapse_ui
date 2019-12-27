@@ -1,0 +1,20 @@
+# nginx config for timelapse_ui flask app
+
+server {
+        server_name timelapse-ui;
+        listen 80;
+        root /srv/timelapse_ui/static;
+
+        location / {
+                try_files $uri @timelapse_ui-flask;
+        }
+
+        location /video/ {
+                alias /srv/timelapse_gen/videos/;
+        }
+
+        location @timelapse_ui-flask {
+                include proxy_params;
+                proxy_pass http://unix:/srv/timelapse_ui/timelapse_ui.sock;
+        }
+}
