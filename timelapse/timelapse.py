@@ -9,12 +9,13 @@ from datetime import datetime
 
 
 def load_config(config_path):
-    global config
     with open(config_path, "r") as config_file:
         config = yaml.safe_load(config_file)
 
     if config is None:
         raise Exception("Unable to load config file")
+
+    return config
 
 
 def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
@@ -65,7 +66,7 @@ def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
 last_photo_time = 0
 
 
-def time_for_photo():
+def time_for_photo(config):
     global last_photo_time
 
     if time.time() >= (last_photo_time + config["interval_s"]):
@@ -83,7 +84,7 @@ args = parser.parse_args()
 if not os.path.exists(args.config):
     raise Exception("Config file not found.")
 
-load_config(args.config)
+config = load_config(args.config)
 
 if not os.path.exists(config["out_dir"]):
     print("{} not found. Creating".format(config["out_dir"]))
@@ -93,9 +94,15 @@ index = 0
 
 while True:
 
-    if time_for_photo():
+    # TODO - setup watchdog to watch config file for changes
+    new_config = load_config(args.config)
+    if new_config != config:
+        print("config changed!")
+    config = new_config
+
+    if time_for_photo(config):
         filename = os.path.join(
-            config["out_dir"], "{}{:05d}.jpg".format(config["prefix"], index)
+            config["out_dir"], "{}{:06d}.jpg".format(config["prefix"], index)
         )
 
         if os.path.exists(filename) and args.overwrite:
