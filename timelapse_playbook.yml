@@ -2,4 +2,5 @@
   vars_files:
     - vars.yml
   roles:
+    - common
     - timelapse
