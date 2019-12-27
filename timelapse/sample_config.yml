@@ -1,5 +1,5 @@
-interval_s: 3
+interval_s: 10
 resolution: 1920x1080
-out_dir: /tmp/test_timelapse_photos
+out_dir: /srv/timelapse/photos
 prefix: test_
 device: /dev/video0
