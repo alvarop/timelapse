@@ -129,8 +129,9 @@ def videos():
     return render_template("videos.html", videos=videos)
 
 
-@app.route("/video/<name>")
-def video(name):
+@app.route("/video/<filename>")
+def video(filename):
+    name = filename.replace(".mp4", "")
 
     video = None
     for config in gen_config["timelapses"]:
