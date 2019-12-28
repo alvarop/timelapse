@@ -12,12 +12,26 @@ class Timelapse:
     def __init__(self, config_path):
         self.config_path = config_path
         self.config = self.load_config(config_path)
+        self.running = False
+        self.start_time = None
+        self.end_time = None
 
         self.start_timelapse()
 
     def start_timelapse(self):
         self.last_photo_time = 0
         self.index = 0
+        self.running = False
+
+        if self.config["start_time"] is not None:
+            self.start_time = self.config["start_time"]
+        else:
+            self.start_time = time.time()
+
+        if self.config["duration"] is not None:
+            self.stop_time = self.start_time + self.config["duration"]
+        else:
+            self.stop_time = 1e99
 
         # Use start time of timelapse as a tag
         self.photo_prefix = "{}{}_".format(
@@ -27,6 +41,22 @@ class Timelapse:
         if not os.path.exists(self.config["out_dir"]):
             print("{} not found. Creating".format(self.config["out_dir"]))
             os.makedirs(self.config["out_dir"], exist_ok=True)
+
+        self.print_summary()
+
+    def print_summary(self):
+        print("---Timelapse Config---")
+        print("Start time: {}".format(self.start_time))
+        print("Stop time: {}".format(self.stop_time))
+        if self.config["duration"] is not None:
+            print("Duration: {}".format(self.config["duration"]))
+            print(
+                "Approximately {} photos will be taken.".format(
+                    floor(self.config["duration"] / self.config["interval"])
+                )
+            )
+        else:
+            print("Timelapse will run indefinitely.")
 
     def load_config(self, config_path):
         with open(config_path, "r") as config_file:
@@ -38,7 +68,10 @@ class Timelapse:
         return config
 
     def time_for_photo(self):
-        if time.time() >= (self.last_photo_time + self.config["interval_s"]):
+        if not self.running:
+            return False
+
+        if time.time() >= (self.last_photo_time + self.config["interval"]):
             self.last_photo_time = time.time()
             return True
         else:
@@ -88,15 +121,30 @@ class Timelapse:
 
         return filename
 
+    def config_check(self):
+        # TODO - setup watchdog to watch config file for changes
+        new_config = self.load_config(args.config)
+        if new_config != self.config:
+            print("Config changed. Starting new timelapse with new settings.")
+            self.config = new_config
+            self.start_timelapse()
+
+    def run_check(self):
+
+        if self.running:
+            if time.time() > self.stop_time:
+                print("Stopping timelapse.")
+                self.running = False
+        else:
+            if self.start_time < time.time() < self.stop_time:
+                print("Starting timelapse.")
+                self.running = True
+
     def run(self):
         while True:
 
-            # TODO - setup watchdog to watch config file for changes
-            new_config = self.load_config(args.config)
-            if new_config != self.config:
-                print("Config changed. Starting new timelapse with new settings.")
-                self.start_timelapse()
-            self.config = new_config
+            self.config_check()
+            self.run_check()
 
             if self.time_for_photo():
                 filename = os.path.join(
