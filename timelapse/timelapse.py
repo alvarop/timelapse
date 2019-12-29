@@ -48,6 +48,8 @@ class Timelapse:
         self.print_summary()
 
     def set_camera_settings(self, verbose=False):
+        if "z_camera_settings" not in self.config:
+            return
         cam_ctrl = v4l2.V4L2(self.config["device"])
         for setting, value in self.config["z_camera_settings"].items():
             if setting in cam_ctrl.controls:
