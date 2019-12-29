@@ -110,7 +110,7 @@ class V4L2:
         for line in result.stdout.decode("utf-8").split("\n"):
             match = resolution_re.search(line)
             if match:
-                x,y = match["resolution"].split("x")
+                x, y = match["resolution"].split("x")
                 resolution = (int(x), int(y))
                 if resolution not in resolutions:
                     resolutions.append(resolution)

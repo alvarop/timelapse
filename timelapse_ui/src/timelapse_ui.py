@@ -108,7 +108,6 @@ def timelapse():
             request.form["start_date"] is not ""
             and request.form["start_time"] is not ""
         ):
-            print(request.form["start_date"], request.form["start_date"])
             start_str = "{} {}".format(
                 request.form["start_date"], request.form["start_time"]
             )
@@ -126,6 +125,7 @@ def timelapse():
         if error_message is not "":
             message = {"title": "ERROR", "text": error_message}
         else:
+            save_config(new_settings, app.config["TIMELAPSE_CONFIG"])
             message = {"title": "", "text": "Settings saved."}
 
     timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
@@ -202,8 +202,7 @@ def default_settings():
     save_config(timelapse_settings, app.config["TIMELAPSE_CONFIG"])
 
     return render_template(
-        "main.html",
-        message={"title": "", "text": "Settings reset."},
+        "main.html", message={"title": "", "text": "Settings reset."}
     )
 
 

@@ -49,4 +49,3 @@ def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
 
 result = take_photo("/dev/video0", "640x480")
 print(result)
-
