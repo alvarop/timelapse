@@ -1,3 +1,4 @@
 ---
 - import_tasks: install_dependencies.yml
+- import_tasks: supervisor.yml
 - import_tasks: nginx.yml

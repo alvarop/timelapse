@@ -5,7 +5,7 @@
     name: nginx
     state: present
 
-- name: Remove devault nginx site
+- name: Remove default nginx site
   become: true
   file:
     path: /etc/nginx/sites-enabled/default
