@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import argparse
+import math
 import os
 import subprocess
 import time
 import yaml
 from datetime import datetime
+from v4l2 import v4l2
 
 
 class Timelapse:
@@ -42,17 +44,34 @@ class Timelapse:
             print("{} not found. Creating".format(self.config["out_dir"]))
             os.makedirs(self.config["out_dir"], exist_ok=True)
 
+        self.set_camera_settings(verbose=True)
         self.print_summary()
+
+    def set_camera_settings(self, verbose=False):
+        cam_ctrl = v4l2.V4L2(self.config["device"])
+        for setting, value in self.config["z_camera_settings"].items():
+            if setting in cam_ctrl.controls:
+                if verbose:
+                    print("Setting {} to {}".format(setting, value))
+                try:
+                    cam_ctrl.controls[setting].set(int(value))
+                except ValueError:
+                    if verbose:
+                        print("Unable to set {}".format(setting))
+            else:
+                if verbose:
+                    print("Setting {} not available.".format("setting"))
 
     def print_summary(self):
         print("---Timelapse Config---")
+        print("Interval: {}".format(self.config["interval"]))
         print("Start time: {}".format(self.start_time))
         print("Stop time: {}".format(self.stop_time))
         if self.config["duration"] is not None:
             print("Duration: {}".format(self.config["duration"]))
             print(
                 "Approximately {} photos will be taken.".format(
-                    floor(self.config["duration"] / self.config["interval"])
+                    math.floor(self.config["duration"] / self.config["interval"])
                 )
             )
         else:
@@ -81,6 +100,9 @@ class Timelapse:
 
         if filename is None:
             filename = tempfile.mktemp(".jpg")
+
+        # Make sure camera settings are set from config before every photo
+        self.set_camera_settings()
 
         result = subprocess.run(
             [

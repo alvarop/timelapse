@@ -11,6 +11,28 @@
       name: exiftool
       state: present
 
+  - name: Install v4l-utils
+    become: true
+    package:
+      name: v4l-utils
+      state: present
+
+  - name: Create v4l2 directory
+    become: true
+    file:
+      path: "{{ V4L2_PY_HOME }}"
+      state: directory
+      owner: "{{ USER }}"
+
+
+  - name: Copy v4l2 files
+    synchronize:
+      src: "{{ LOCAL_V4L2_PY_HOME }}/"
+      dest: "{{ V4L2_PY_HOME }}"
+      rsync_opts:
+        - "--exclude=*.egg-info"
+        - "--chown={{ USER }}:{{ USER }}"
+
   - name: Create app directory
     become: true
     file:

@@ -23,6 +23,11 @@ def load_config(config_path):
     return config
 
 
+def save_config(config, config_path):
+    with open(config_path, "w") as config_file:
+        yaml.dump(config, config_file, default_flow_style=False)
+
+
 gen_config = load_config(app.config["TIMELAPSE_GEN_CONFIG"])
 
 
@@ -73,18 +78,98 @@ def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
 
 @app.route("/")
 def root():
+    return redirect("/preview")
+
+
+@app.route("/timelapse")
+def timelapse():
+    timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
+    cam_ctrl = v4l2.V4L2(timelapse_settings["device"])
+    resolutions = cam_ctrl.get_resolutions()
+    resolutions_str = []
+    for resolution in resolutions:
+        resolutions_str.append("{}x{}".format(resolution[0], resolution[1]))
+
+    if timelapse_settings["start_time"] is not None:
+        localtime = time.localtime(int(timelapse_settings["start_time"]))
+        start_day = time.strftime("%Y-%m-%d", localtime)
+        start_time = time.strftime("%H:%M", localtime)
+        timelapse_settings["start_time"] = (start_day, start_time)
+
+    return render_template(
+        "timelapse.html", settings=timelapse_settings, resolutions=resolutions_str
+    )
+
+
+INTEGER_SETTINGS = ["interval", "start_time", "duration"]
+REQUIRED_SETTINGS = ["interval", "resolution", "out_dir", "prefix", "device"]
+
+
+@app.route("/save_timelapse_settings", methods=["POST"])
+def save_timelapse_settings():
+    timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
+    new_settings = timelapse_settings
+
+    for item, value in request.form.items():
+        if item == "start_date" or item == "start_time":
+            continue
+        elif item in INTEGER_SETTINGS:
+            try:
+                new_settings[item] = int(value)
+            except ValueError:
+                new_settings[item] = None
+        else:
+            new_settings[item] = value
+
+    if request.form["start_date"] is not "" and request.form["start_date"] is not "":
+        start_str = "{} {}".format(
+            request.form["start_date"], request.form["start_time"]
+        )
+        new_settings["start_time"] = int(
+            datetime.strptime(start_str, "%Y-%m-%d %H:%M").timestamp()
+        )
+    else:
+        new_settings["start_time"] = None
+
+    error_message = ""
+    for key in REQUIRED_SETTINGS:
+        if new_settings[key] is None or new_settings[key] is "":
+            error_message += "Error: {} is required!<br />\n".format(key)
+
+    if error_message is not "":
+        return error_message
+    else:
+        save_config(new_settings, app.config["TIMELAPSE_CONFIG"])
+        return "Settings Saved"
+
+
+@app.route("/preview")
+def preview():
     cam_control = v4l2.V4L2()
     return render_template("preview.html", controls=cam_control.controls)
 
 
 @app.route("/update_settings", methods=["POST"])
 def update_settings():
+
     cam_control = v4l2.V4L2()
     for item, value in request.form.items():
         control = cam_control.controls[item]
+        print(item, value, control.limits.get("flags"), control.get(), int(value))
         if control.limits.get("flags") != "inactive" and control.get() != int(value):
             print("updating", item, value)
             control.set(int(value))
+            control.set(int(value))
+            control.set(int(value))
+
+    camera_settings = {}
+    for control_name, control in cam_control.controls.items():
+        camera_settings[control_name] = control.value
+
+    timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
+    timelapse_settings["z_camera_settings"] = camera_settings
+    save_config(timelapse_settings, app.config["TIMELAPSE_CONFIG"])
+
     return "OK"
 
 
@@ -93,8 +178,22 @@ def default_settings():
     cam_control = v4l2.V4L2()
     for name, control in cam_control.controls.items():
         if control.limits.get("flags") != "inactive":
-            control.set(control.limits["default"])
+            try:
+                control.set(control.limits["default"])
+            except ValueError:
+                pass
             print("updating", name, control.limits["default"])
+
+    # Read settings in again before saving
+    cam_control = v4l2.V4L2()
+    camera_settings = {}
+    for control_name, control in cam_control.controls.items():
+        camera_settings[control_name] = control.value
+
+    timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
+    timelapse_settings["z_camera_settings"] = camera_settings
+    save_config(timelapse_settings, app.config["TIMELAPSE_CONFIG"])
+
     return redirect("/")
 
 

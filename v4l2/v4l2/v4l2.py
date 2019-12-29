@@ -1,3 +1,4 @@
+import re
 import subprocess
 
 
@@ -87,9 +88,9 @@ class V4L2:
     def __init__(self, device=0):
         self.device = device
         self.controls = {}
-        self.get_ctrls(self.device)
+        self.get_ctrls()
 
-    def get_ctrls(self, device):
+    def get_ctrls(self):
         result = subprocess.run(
             ["v4l2-ctl", "-d", str(self.device), "-l"], stdout=subprocess.PIPE
         )
@@ -98,6 +99,23 @@ class V4L2:
             if len(control_string) > 0:
                 control = V4L2_Ctrl(control_string, self.device)
                 self.controls[control.name] = control
+
+    def get_resolutions(self):
+        result = subprocess.run(
+            ["v4l2-ctl", "-d", str(self.device), "--list-formats-ext"],
+            stdout=subprocess.PIPE,
+        )
+        resolutions = []
+        resolution_re = re.compile(r"(?P<resolution>[0-9]+x[0-9]+)")
+        for line in result.stdout.decode("utf-8").split("\n"):
+            match = resolution_re.search(line)
+            if match:
+                x,y = match["resolution"].split("x")
+                resolution = (int(x), int(y))
+                if resolution not in resolutions:
+                    resolutions.append(resolution)
+
+        return sorted(resolutions)
 
 
 def list_devices():

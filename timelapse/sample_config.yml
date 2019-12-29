@@ -1,7 +1,7 @@
+device: /dev/video0
+duration:
 interval: 10
-resolution: 1920x1080
 out_dir: /srv/timelapse/photos
 prefix: test_
-device: /dev/video0
-start_time:
-duration:
+resolution: 1920x1080
+start_time: null

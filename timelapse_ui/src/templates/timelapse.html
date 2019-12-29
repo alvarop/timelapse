@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Timelapse Preview</title>
+  <link rel="stylesheet" href="/static/css/bulma.min.css">
+
+  <script type="text/javascript">
+
+  function refresh_photo() {
+    console.log('Refreshing picture');
+    document.getElementById("preview-photo").src = "/preview_photo#"+ new Date();
+  };
+
+  // From https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Sending_forms_through_JavaScript
+  function update_settings( data ) {
+    const XHR = new XMLHttpRequest(),
+          FD  = new FormData();
+
+    // Push our data into our FormData object
+    for( name in data ) {
+      FD.append( name, data[ name ] );
+    }
+
+    // Define what happens on successful data submission
+    XHR.addEventListener( 'load', function( event ) {
+      // TODO - do something with response
+      console.log(event.target.responseText);
+      refresh_photo();
+    } );
+
+    // Define what happens in case of error
+    XHR.addEventListener(' error', function( event ) {
+      alert( 'Oops! Something went wrong.' );
+    } );
+
+    // Set up our request
+    XHR.open( 'POST', '/update_settings' );
+
+    // Send our FormData object; HTTP headers are set automatically
+    XHR.send( FD );
+  }
+
+  function setting_change(event) {
+    var element = event.target;
+    var data = {}
+
+    data[element.name] = element.value;
+    update_settings(data);
+  };
+  </script>
+</head>
+
+<body>
+
+<section class="section">
+  <div class="container is-fluid has-text-centered">
+    <h1 class="is-h2">Timelapse Settings</h1>
+    <form method="POST" action="/save_timelapse_settings">
+      <table class="table is-bordered is-striped" style="margin-left: auto; margin-right: auto;">
+          <tr>
+            <td>Setting</td>
+            <td>Value</td>
+          </tr>
+
+        {% for key,value in settings.items() %}
+        <tr>
+          <td>{{key}}</td>
+          <td>
+          {% if key == "resolution" %}
+          <select name="resolution" >
+            {% for resolution in resolutions %}
+            <option value="{{ resolution }}" {% if value == resolution %}selected{% endif %}>{{ resolution }}</option>
+            {% endfor %}
+          </select>
+          {% elif key == "start_time" %}
+          <input type="date" id="start_date" name="start_date" {% if value %} value="{{value[0]}}" {% endif %} >
+          <input type="time" id="start_time" name="start_time" {% if value %} value="{{value[1]}}" {% endif %}>
+          {% elif key == "camera_settings" %}
+          {% else %}
+          <input type="text" name="{{key}}" value="{% if value %}{{ value }}{% endif %}" />
+          {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        <tr><td colspan="2"><button class="button is-primary">Save</button></td></tr>
+      </table>
+    </form>
+</div>
+</section>
+</body>
+
+</html>
