@@ -3,6 +3,7 @@ TIMELAPSE_HOME: "/srv/timelapse/"
 
 LOCAL_TIMELAPSE_GEN_HOME: "./timelapse_gen"
 TIMELAPSE_GEN_HOME: "/srv/timelapse_gen/"
+TIMELAPSE_GEN_VIDEO: "/srv/timelapse_gen/videos"
 
 LOCAL_TIMELAPSE_UI_HOME: "./timelapse_ui"
 TIMELAPSE_UI_HOME: "/srv/timelapse_ui/"
@@ -10,4 +11,4 @@ TIMELAPSE_UI_HOME: "/srv/timelapse_ui/"
 LOCAL_V4L2_PY_HOME: "./v4l2"
 V4L2_PY_HOME: "/srv/v4l2/"
 
-USER: "alvaro"
+USER: "pi"

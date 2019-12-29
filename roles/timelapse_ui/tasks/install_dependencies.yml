@@ -12,7 +12,6 @@
       state: directory
       owner: "{{ USER }}"
 
-
   - name: Copy v4l2 files
     synchronize:
       src: "{{ LOCAL_V4L2_PY_HOME }}/"
@@ -28,13 +27,12 @@
       state: directory
       owner: "{{ USER }}"
 
-  - name: Copy timelapse_gen files
+  - name: Copy timelapse_ui files
     synchronize:
         src: "{{ LOCAL_TIMELAPSE_UI_HOME }}/"
         dest: "{{ TIMELAPSE_UI_HOME }}"
         rsync_opts:
         - "--chown={{ USER }}:{{ USER }}"
-
 
   - name: Install virtualenv requirements
     pip:
