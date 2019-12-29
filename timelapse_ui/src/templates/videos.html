@@ -4,7 +4,13 @@
   <div class="container is-fluid has-text-centered">
     <h2 class="is-h2">Available Videos</h2>
     {% for video in videos %}
-    <p><a href="/video/{{ video["name"] }}.mp4">{{ video["name"] }} ({{ video["resolution"] }})</a></p>
+    <div>
+        <video width="852" height="480" controls>
+        <source src="/video/{{ video["name"] }}.mp4" type="video/mp4">
+        <a href="/video/{{ video["name"] }}.mp4">{{ video["name"] }} ({{ video["resolution"] }})</a>
+        </video>
+    </div>
+    <p></p>
     {% endfor %}
 </div>
 </section>
