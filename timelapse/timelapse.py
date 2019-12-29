@@ -67,9 +67,20 @@ class Timelapse:
     def print_summary(self):
         print("---Timelapse Config---")
         print("Interval: {}".format(self.config["interval"]))
-        print("Start time: {}".format(self.start_time))
-        print("Stop time: {}".format(self.stop_time))
-        if self.config["duration"] is not None:
+        print(
+            "Start time: {}".format(
+                time.strftime("%Y-%m-%d %H:%M", time.localtime(int(self.start_time)))
+            )
+        )
+        if self.stop_time < 1e99:
+            print(
+                "Stop time: {}".format(
+                    time.strftime("%Y-%m-%d %H:%M", time.localtime(int(self.stop_time)))
+                )
+            )
+        if self.stop_time < time.time():
+            print("Timelapse has already finished. Will not start.")
+        elif self.config["duration"] is not None:
             print("Duration: {}".format(self.config["duration"]))
             print(
                 "Approximately {} photos will be taken.".format(
