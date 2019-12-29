@@ -1,0 +1,2 @@
+TIMELAPSE_CONFIG = "../timelapse/config.yml"
+TIMELAPSE_GEN_CONFIG = "../timelapse_gen/config.yml"

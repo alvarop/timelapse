@@ -1,0 +1,46 @@
+---
+  - name: Update user
+    become: true
+    user:
+      name: "{{ USER }}"
+      groups: video
+      append: true
+
+  - name: Install imagemagick
+    become: true
+    package:
+      name: imagemagick
+      state: present
+
+  - name: Install ffmpeg
+    become: true
+    package:
+      name: ffmpeg
+      state: present
+
+  - name: Create app directory
+    become: true
+    file:
+      path: "{{ TIMELAPSE_GEN_HOME }}"
+      state: directory
+      owner: "{{ USER }}"
+
+  - name: Create video out directory
+    become: true
+    file:
+      path: "{{ TIMELAPSE_GEN_VIDEO }}"
+      state: directory
+      owner: "{{ USER }}"
+
+  - name: Copy timelapse_gen files
+    synchronize:
+        src: "{{ LOCAL_TIMELAPSE_GEN_HOME }}/"
+        dest: "{{ TIMELAPSE_GEN_HOME }}"
+        rsync_opts:
+        - "--chown={{ USER }}:{{ USER }}"
+
+  - name: Install virtualenv requirements
+    pip:
+      requirements: "{{ TIMELAPSE_GEN_HOME }}/requirements.txt"
+      virtualenv: "{{ TIMELAPSE_GEN_HOME }}/venv"
+      virtualenv_python: python3

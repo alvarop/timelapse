@@ -1,0 +1,19 @@
+---
+- name: Setup Supervisor
+  become: true
+  package:
+    name: supervisor
+    state: present
+
+- name: Copy Supervisor Config
+  become: true
+  template:
+    src: "timelapse_supervisor.conf"
+    dest: "/etc/supervisor/conf.d/"
+
+- name: Restart supervisor
+  become: true
+  systemd:
+    name: supervisor
+    state: restarted
+    enabled: true

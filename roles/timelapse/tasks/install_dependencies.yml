@@ -1,0 +1,54 @@
+---
+  - name: Install fswebcam
+    become: true
+    package:
+      name: fswebcam
+      state: present
+
+  - name: Install exiftool
+    become: true
+    package:
+      name: exiftool
+      state: present
+
+  - name: Install v4l-utils
+    become: true
+    package:
+      name: v4l-utils
+      state: present
+
+  - name: Create v4l2 directory
+    become: true
+    file:
+      path: "{{ V4L2_PY_HOME }}"
+      state: directory
+      owner: "{{ USER }}"
+
+
+  - name: Copy v4l2 files
+    synchronize:
+      src: "{{ LOCAL_V4L2_PY_HOME }}/"
+      dest: "{{ V4L2_PY_HOME }}"
+      rsync_opts:
+        - "--exclude=*.egg-info"
+        - "--chown={{ USER }}:{{ USER }}"
+
+  - name: Create app directory
+    become: true
+    file:
+      path: "{{ TIMELAPSE_HOME }}"
+      state: directory
+      owner: "{{ USER }}"
+
+  - name: Copy timelapse files
+    synchronize:
+        src: "{{ LOCAL_TIMELAPSE_HOME }}/"
+        dest: "{{ TIMELAPSE_HOME }}"
+        rsync_opts:
+        - "--chown={{ USER }}:{{ USER }}"
+
+  - name: Install virtualenv requirements
+    pip:
+      requirements: "{{ TIMELAPSE_HOME }}/requirements.txt"
+      virtualenv: "{{ TIMELAPSE_HOME }}/venv"
+      virtualenv_python: python3
