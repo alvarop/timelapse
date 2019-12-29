@@ -1,10 +1,5 @@
-<!doctype html>
-<html>
-
-<head>
-  <title>Timelapse Preview</title>
-  <link rel="stylesheet" href="/static/css/bulma.min.css">
-
+{% extends "layout.html" %}
+{% block head %}
   <script type="text/javascript">
 
   function refresh_photo() {
@@ -49,21 +44,20 @@
     update_settings(data);
   };
   </script>
-</head>
+{% endblock %}
 
-<body>
-
+{% block body %}
 <section class="section">
   <div class="container is-fluid has-text-centered">
     <h1 class="is-h2">Timelapse Settings</h1>
-    <form method="POST" action="/save_timelapse_settings">
+    <form method="POST" action="/timelapse">
       <table class="table is-bordered is-striped" style="margin-left: auto; margin-right: auto;">
           <tr>
             <td>Setting</td>
             <td>Value</td>
           </tr>
 
-        {% for key,value in settings.items() %}
+        {% for key,value in settings.items() if key != "z_camera_settings" %}
         <tr>
           <td>{{key}}</td>
           <td>
@@ -76,7 +70,6 @@
           {% elif key == "start_time" %}
           <input type="date" id="start_date" name="start_date" {% if value %} value="{{value[0]}}" {% endif %} >
           <input type="time" id="start_time" name="start_time" {% if value %} value="{{value[1]}}" {% endif %}>
-          {% elif key == "camera_settings" %}
           {% else %}
           <input type="text" name="{{key}}" value="{% if value %}{{ value }}{% endif %}" />
           {% endif %}
@@ -88,6 +81,4 @@
     </form>
 </div>
 </section>
-</body>
-
-</html>
+{% endblock %}

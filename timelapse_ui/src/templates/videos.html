@@ -1,13 +1,5 @@
-<!doctype html>
-<html>
-
-<head>
-  <title>Timelapse Videos</title>
-  <link rel="stylesheet" href="/static/css/bulma.min.css">
-</head>
-
-<body>
-
+{% extends "layout.html" %}
+{% block body %}
 <section class="section">
   <div class="container is-fluid has-text-centered">
     <h2 class="is-h2">Available Videos</h2>
@@ -16,6 +8,4 @@
     {% endfor %}
 </div>
 </section>
-</body>
-
-</html>
+{% endblock %}

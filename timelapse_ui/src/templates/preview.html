@@ -1,12 +1,6 @@
-<!doctype html>
-<html>
-
-<head>
-  <title>Timelapse Preview</title>
-  <link rel="stylesheet" href="/static/css/bulma.min.css">
-
+{% extends "layout.html" %}
+{% block head %}
   <script type="text/javascript">
-
   function refresh_photo() {
     console.log('Refreshing picture');
     document.getElementById("preview-photo").src = "/preview_photo#"+ new Date();
@@ -49,10 +43,9 @@
     update_settings(data);
   };
   </script>
-</head>
+{% endblock %}
 
-<body>
-
+{% block body %}
 <section class="section">
   <div class="container is-fluid">
     <div class="card-image has-text-centered">
@@ -101,6 +94,4 @@
     </table>
 </div>
 </section>
-</body>
-
-</html>
+{% endblock %}

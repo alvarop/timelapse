@@ -78,11 +78,56 @@ def take_photo(device="/dev/video0", resolution="1920x1080", filename=None):
 
 @app.route("/")
 def root():
-    return redirect("/preview")
+    return render_template("main.html")
 
 
-@app.route("/timelapse")
+INTEGER_SETTINGS = ["interval", "start_time", "duration"]
+REQUIRED_SETTINGS = ["interval", "resolution", "out_dir", "prefix", "device"]
+
+
+@app.route("/timelapse", methods=["GET", "POST"])
 def timelapse():
+    message = None
+
+    if request.form:
+        timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
+        new_settings = timelapse_settings
+
+        for item, value in request.form.items():
+            if item == "start_date" or item == "start_time":
+                continue
+            elif item in INTEGER_SETTINGS:
+                try:
+                    new_settings[item] = int(value)
+                except ValueError:
+                    new_settings[item] = None
+            else:
+                new_settings[item] = value
+
+        if (
+            request.form["start_date"] is not ""
+            and request.form["start_time"] is not ""
+        ):
+            print(request.form["start_date"], request.form["start_date"])
+            start_str = "{} {}".format(
+                request.form["start_date"], request.form["start_time"]
+            )
+            new_settings["start_time"] = int(
+                datetime.strptime(start_str, "%Y-%m-%d %H:%M").timestamp()
+            )
+        else:
+            new_settings["start_time"] = None
+
+        error_message = ""
+        for key in REQUIRED_SETTINGS:
+            if new_settings[key] is None or new_settings[key] is "":
+                error_message += "Error: {} is required!\n".format(key)
+
+        if error_message is not "":
+            message = {"title": "ERROR", "text": error_message}
+        else:
+            message = {"title": "", "text": "Settings saved."}
+
     timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
     cam_ctrl = v4l2.V4L2(timelapse_settings["device"])
     resolutions = cam_ctrl.get_resolutions()
@@ -97,50 +142,15 @@ def timelapse():
         timelapse_settings["start_time"] = (start_day, start_time)
 
     return render_template(
-        "timelapse.html", settings=timelapse_settings, resolutions=resolutions_str
+        "timelapse.html",
+        settings=timelapse_settings,
+        resolutions=resolutions_str,
+        message=message,
     )
 
 
-INTEGER_SETTINGS = ["interval", "start_time", "duration"]
-REQUIRED_SETTINGS = ["interval", "resolution", "out_dir", "prefix", "device"]
-
-
-@app.route("/save_timelapse_settings", methods=["POST"])
-def save_timelapse_settings():
-    timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
-    new_settings = timelapse_settings
-
-    for item, value in request.form.items():
-        if item == "start_date" or item == "start_time":
-            continue
-        elif item in INTEGER_SETTINGS:
-            try:
-                new_settings[item] = int(value)
-            except ValueError:
-                new_settings[item] = None
-        else:
-            new_settings[item] = value
-
-    if request.form["start_date"] is not "" and request.form["start_date"] is not "":
-        start_str = "{} {}".format(
-            request.form["start_date"], request.form["start_time"]
-        )
-        new_settings["start_time"] = int(
-            datetime.strptime(start_str, "%Y-%m-%d %H:%M").timestamp()
-        )
-    else:
-        new_settings["start_time"] = None
-
-    error_message = ""
-    for key in REQUIRED_SETTINGS:
-        if new_settings[key] is None or new_settings[key] is "":
-            error_message += "Error: {} is required!<br />\n".format(key)
-
-    if error_message is not "":
-        return error_message
-    else:
-        save_config(new_settings, app.config["TIMELAPSE_CONFIG"])
-        return "Settings Saved"
+# @app.route("/save_timelapse_settings", methods=["POST"])
+# def save_timelapse_settings():
 
 
 @app.route("/preview")
@@ -151,15 +161,12 @@ def preview():
 
 @app.route("/update_settings", methods=["POST"])
 def update_settings():
-
     cam_control = v4l2.V4L2()
     for item, value in request.form.items():
         control = cam_control.controls[item]
         print(item, value, control.limits.get("flags"), control.get(), int(value))
         if control.limits.get("flags") != "inactive" and control.get() != int(value):
             print("updating", item, value)
-            control.set(int(value))
-            control.set(int(value))
             control.set(int(value))
 
     camera_settings = {}
@@ -194,7 +201,10 @@ def default_settings():
     timelapse_settings["z_camera_settings"] = camera_settings
     save_config(timelapse_settings, app.config["TIMELAPSE_CONFIG"])
 
-    return redirect("/")
+    return render_template(
+        "main.html",
+        message={"title": "", "text": "Settings reset."},
+    )
 
 
 @app.route("/preview_photo")
