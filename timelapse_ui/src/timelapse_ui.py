@@ -10,7 +10,7 @@ from v4l2 import v4l2
 
 app = Flask(__name__)
 app.config.from_pyfile("default_config")
-app.config.from_envvar("TIMELAPSE_UI_SETTINGS", silent=True)
+app.config.from_envvar("TIMELAPSE_UI_SETTINGS", silent=False)
 
 
 def load_config(config_path):
@@ -208,7 +208,9 @@ def default_settings():
 
 @app.route("/preview_photo")
 def preview_photo():
-    filename = take_photo()
+    timelapse_settings = load_config(app.config["TIMELAPSE_CONFIG"])
+
+    filename = take_photo(device=timelapse_settings["device"])
     if filename is None:
         return "Error"
 
